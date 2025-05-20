@@ -3,13 +3,15 @@ package upc.edu.template.presentation.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,6 +20,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import upc.edu.template.presentation.di.PresentationModule
+import upc.edu.template.presentation.view.GameDetailView
+import upc.edu.template.presentation.view.SearchGameView
 
 @Preview
 @Composable
@@ -26,20 +31,22 @@ fun Home(){
 
     val navigationItems = listOf(
         NavigationItem(
-            icon = Icons.Default.Home,
-            title = "Elegir icono",
-            route = "destinoInicial"
+            icon = Icons.Default.Search,
+            title = "search",
+            route = "search_games"
         ),
         NavigationItem(
-            icon = Icons.Default.Face,
-            title = "Elegir icono",
-            route = "destino2"
+            icon = Icons.Default.Favorite,
+            title = "favorites",
+            route = "favorites"
         ),
     )
 
     val selectedIndex = remember {
         mutableIntStateOf(0)
     }
+
+    val searchGameViewModel = PresentationModule.getSearchGameViewModel()
 
     Scaffold(
         bottomBar = {
@@ -64,16 +71,24 @@ fun Home(){
     ) { padding ->
         NavHost(
             navController,
-            startDestination = "destinoInicial",
+            startDestination = "search_games",
             modifier = Modifier.padding(padding)
         ){
-            composable("destinoInicial"){
-                // Aquí va el contenido de la pantalla inicial
+            composable("search_games"){
+                SearchGameView(searchGameViewModel){ gameId ->
+                    navController.navigate("game_detail/${gameId}")
+                }
             }
-            composable("destino2"){
-                // Aquí va el contenido de la pantalla 2
+            composable("game_detail/{gameId}") { backStackEntry ->
+                val gameId = backStackEntry.arguments?.getString("gameId")?.toIntOrNull()
+                    ?: return@composable
+                searchGameViewModel.getGameById(gameId)
+                val gameDetail = searchGameViewModel.gameDetail.observeAsState()
+                gameDetail.value?.let { game ->
+                    GameDetailView(game)
+                }
             }
-            composable("destino3"){
+            composable("favorites"){
                 // Aquí va el contenido de la pantalla 3
             }
         }
