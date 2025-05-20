@@ -1,11 +1,13 @@
 package upc.edu.template.data.model
 
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 import upc.edu.template.domain.model.FavoriteGame
 import upc.edu.template.domain.model.Game
 
+@Entity(tableName = "games")
 data class GameEntity(
-    @PrimaryKey
+    @PrimaryKey val id: Int,
     val title: String,
     val thumbnail: String,
     val shortDescription: String,
@@ -25,6 +27,7 @@ data class GameEntity(
     companion object{
         fun fromGame(game: Game): GameEntity{
             return GameEntity(
+                id = game.id,
                 title = game.title,
                 thumbnail = game.thumbnail,
                 shortDescription = game.shortDescription,
@@ -34,6 +37,7 @@ data class GameEntity(
         }
         fun fromFavoriteGame(game: FavoriteGame): GameEntity{
             return GameEntity(
+                id = game.id,
                 title = game.title,
                 thumbnail = game.thumbnail,
                 shortDescription = game.shortDescription,
